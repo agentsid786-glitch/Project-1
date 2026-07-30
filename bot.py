@@ -69,8 +69,8 @@ def handle_message(message):
     """
     
     try:
-        # BULLETPROOF LOOP: Try every standard model alias until one works
-        models_to_try = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-pro', 'gemini-2.5']
+        # BULLETPROOF LOOP: Using the exact stable 2026 models from the docs
+        models_to_try = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-2.5-flash']
         resp = None
         
         for m_name in models_to_try:
