@@ -3,7 +3,7 @@ import json
 import threading
 import time
 import telebot
-import google.generativeai as genai
+from google import genai
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 import uvicorn
@@ -16,9 +16,9 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 PUBLIC_LOG_URL = os.environ.get("PUBLIC_LOG_URL")
 
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
-genai.configure(api_key=GEMINI_API_KEY)
 
-model = genai.GenerativeModel('gemini-1.5-flash')
+# Initialize the new 2026 GenAI Client
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 # ==========================================
 # LOGGING SERVER (FastAPI)
@@ -34,7 +34,6 @@ def get_log():
     return FileResponse(LOG_FILE)
 
 def run_fastapi():
-    # RENDER FIX: Render assigns a dynamic port. We must use it instead of hardcoding 8000.
     port = int(os.environ.get("PORT", 10000))
     uvicorn.run(app, host="0.0.0.0", port=port, log_level="error")
 
@@ -70,7 +69,11 @@ def handle_message(message):
     """
     
     try:
-        resp = model.generate_content(sys_prompt)
+        # Use the modern GenAI generation method
+        resp = client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=sys_prompt
+        )
         reply_text = resp.text.strip()
         
         if reply_text.startswith("```json"): reply_text = reply_text[7:]
