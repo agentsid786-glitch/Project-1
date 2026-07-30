@@ -88,14 +88,17 @@ def handle_message(message):
             f.write(json.dumps({"role": "bot", "content": reply_text}) + "\n")
             
     except Exception as e:
-        print(f"Error: {e}") 
+        # We added flush=True to force Render to print instantly
+        print(f"Error: {e}", flush=True) 
+        
+        # We are injecting the EXACT error into the Telegram message!
         fallback_json = json.dumps({
-            "answer": "error", 
+            "answer": f"CRASH_REASON: {str(e)}", 
             "log_url": f"{PUBLIC_LOG_URL}/run.jsonl"
         })
         bot.reply_to(message, fallback_json)
 
 if __name__ == "__main__":
     threading.Thread(target=run_fastapi, daemon=True).start()
-    print("Bot is polling and API is running...")
+    print("Bot is polling and API is running...", flush=True)
     bot.polling(none_stop=True)
