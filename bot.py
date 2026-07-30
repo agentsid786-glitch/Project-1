@@ -69,18 +69,22 @@ def handle_message(message):
     """
     
     try:
-        # Use the modern GenAI generation method with the newest model
-        try:
-            resp = client.models.generate_content(
-                model='gemini-3.5-flash',
-                contents=sys_prompt
-            )
-        except Exception:
-            # Fallback to Pro if the Flash model is unavailable
-            resp = client.models.generate_content(
-                model='gemini-3.1-pro',
-                contents=sys_prompt
-            )
+        # BULLETPROOF LOOP: Try every standard model alias until one works
+        models_to_try = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-pro', 'gemini-2.5']
+        resp = None
+        
+        for m_name in models_to_try:
+            try:
+                resp = client.models.generate_content(
+                    model=m_name,
+                    contents=sys_prompt
+                )
+                break # If it succeeds, break out of the loop!
+            except Exception:
+                continue # If it 404s, instantly try the next one
+                
+        if not resp:
+            raise Exception("All models failed!")
             
         reply_text = resp.text.strip()
         
