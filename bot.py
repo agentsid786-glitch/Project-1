@@ -69,11 +69,19 @@ def handle_message(message):
     """
     
     try:
-        # Use the modern GenAI generation method
-        resp = client.models.generate_content(
-            model='gemini-1.5-flash',
-            contents=sys_prompt
-        )
+        # Use the modern GenAI generation method with the newest model
+        try:
+            resp = client.models.generate_content(
+                model='gemini-3.5-flash',
+                contents=sys_prompt
+            )
+        except Exception:
+            # Fallback to Pro if the Flash model is unavailable
+            resp = client.models.generate_content(
+                model='gemini-3.1-pro',
+                contents=sys_prompt
+            )
+            
         reply_text = resp.text.strip()
         
         if reply_text.startswith("```json"): reply_text = reply_text[7:]
