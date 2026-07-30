@@ -38,7 +38,9 @@ def get_log():
     return FileResponse(LOG_FILE)
 
 def run_fastapi():
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="error")
+    # Render assigns a dynamic port, so we must read it from the environment
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="error")
 
 # ==========================================
 # TELEGRAM BOT LOGIC
@@ -94,6 +96,7 @@ def handle_message(message):
             f.write(json.dumps({"role": "bot", "content": reply_text}) + "\n")
             
     except Exception as e:
+        print(f"Error during AI generation: {e}") # This helps us see errors in Render logs
         fallback_json = json.dumps({
             "answer": "error", 
             "log_url": f"{PUBLIC_LOG_URL}/run.jsonl"
